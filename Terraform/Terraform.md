@@ -2,7 +2,7 @@
 
 ## Terrafrom Command Basics
 
-1. terraform init
+1. terraform init 
 
 Purpose: 
 - initialize a working directory containing terraform config files.
@@ -22,6 +22,12 @@ Purpose:
 
 Purpose:
 - apply changes requried to reach the desired state of the configuraiton.
+
+Now the folders have:
+- main.tf
+- terraform.tfstate
+- terraform.lock.hcl (hash)
+- terraform/providers/xxx/xxx
 
 5. terraform destroy
 
