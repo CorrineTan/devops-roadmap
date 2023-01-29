@@ -199,6 +199,122 @@ Update the pods. Deployment is using replicaset to add new nodes.
 - kubectl create deployment
 
 Two kinds:
-- recreate
 
-- 
+- Recreate
+
+- RollingUpdate
+
+```
+kubectl rollout history deployment/frontend --revision=2
+kubectl rollout undo deployment/frontend
+kubectl rollout status deployment/frontedn
+kubectl set image --record=true deploy/vote vote=nginx
+```
+
+Deployment yaml:
+
+```
+apiVersion: 1
+kind: Deployment
+metadata:
+	name: frontend
+	labels:
+		app: guestbook
+spec:
+	relicas: 4
+	strategy:
+		type: Recreate
+	selector:
+		matchLabels:
+			tier: frontend
+	template:
+		metadata:
+			labels:	
+				tier: frontend
+		spec:
+			containers:
+				- name: php-redis
+				  image: gcr.....
+```
+
+### Service
+
+An abstract way to expose an application running on a set of POD
+
+K8S allows node (from the same cluster) with internal IP(172.xxx) communicate with each other. Ip changes... hard to manage. 
+
+ClusterIp Service (internal IP but not 172) allows all pod communicate with it (service). but outside cannot access its IP.
+
+$ kubectl expose deploy/redis --port=6379 --target-port=6379
+
+or 
+
+Service yaml:
+
+```
+apiVersion: 1
+kind: Service
+metadata:
+	name: nginx-clusterip-svc
+	labels:
+		app: nginx
+spec:
+	ports:
+		- port: 6379
+		targetPort: 6379
+	selector:
+		app: nginx
+	type: ClusterIP
+```
+
+Note that targetPort is port attached to Pod. port is port attached to ClusterIp Service.
+
+Basic commands:
+
+kubectl get svc -o wide
+
+### NodePort Service
+
+Outside can access this NodePort Service.   Port range must inside: 30000-32767
+
+$ kubectl expose ... --type=NodePort ...
+
+or 
+
+Service yaml:
+
+```
+apiVersion: 1
+kind: Service
+metadata:
+	name: nginx-clusterip-svc
+	labels:
+		app: nginx
+spec:
+	ports:
+		- port: 80
+		targetPort: 80
+		nodePort: 30000
+	selector:
+		app: nginx
+	type: NodePort
+```
+
+Use a load balancer then we can have a DNS.
+
+```
+apiVersion: 1
+kind: Service
+metadata:
+	name: nginx-clusterip-svc
+	labels:
+		app: nginx
+spec:
+	ports:
+		- port: 80
+		targetPort: 80
+		nodePort: 30000
+	selector:
+		app: nginx
+	type: LoadBalancer
+```
