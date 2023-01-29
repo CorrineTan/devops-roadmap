@@ -29,6 +29,8 @@ Now the folders have:
 - terraform.lock.hcl (hash)
 - terraform/providers/xxx/xxx
 
+Apply again, it will show a terraform.tsstate.backup
+
 5. terraform destroy
 
 Purpose:
