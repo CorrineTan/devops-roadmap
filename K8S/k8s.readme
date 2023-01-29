@@ -1,0 +1,204 @@
+# K8S
+
+### Containerization
+
+- OS-level virtualization. Split the Operating Systems into different spaces/containers. Each container has Apps or Libs. They are running on the shared OS Kernal and hardware. We don't want them iteracting with each others.
+
+- Earlist: Harware Virtualization. - Virtual Machine. (For example VMWare, Oracle VirtualBox, Microsoft Hyper-V). Theory is to add a Hypervisor on top of the Hareware.
+
+- Drawback of Hardware virtualizaiton - virtual machine: OS system occupies too much resources. Very slow to start. Virtual image is huge - GB.
+
+- Kubernets orchestrate Container. 
+
+- Docker Image: App + configs.
+
+```
+docker run --name container-name image-name
+```
+
+- Docker can be put to Docker Registry. (for example public dockerhub)
+
+- Orchestration aming for:
+
+1) auto-scalig  2)which machine - assignment  3)network  4)Load balancing  5)disaster recovery  6) update/rotate
+
+orchestration is management.
+
+### K8S cluster and component
+
+- Node: 
+machine in the cluster. Each has cotainer engine - docker installed on it. Cluster advantage: high available, disaster recovery.
+
+- Who to control node: 
+Control Plane: consists of API Server, etcd, controllers, schedulers.
+
+- Components on each nodes: Kubelet - k8s agent
+
+#### Components of Control plane:
+
+- Kube-apiserver
+
+Front end for the Kubernetes control plane. It validates and configures data for the api objects which include pods, services, replicationcontrollers, and others. 
+
+Kubectl (command-line tool) is running on it. Deploy applications, inspect and manage cluster resources, and view logs.
+
+- etcd
+
+Key-value store used as Kubernetes' backing store for all cluster data.
+
+- scheduler
+
+Watches for newly created Pods with no assigned node, and selects a node for them to run on.
+
+- controller 
+
+process that achieve certain functions. ex) replica set controller
+
+### K8S and Microservice
+
+#### Monolithic Architecture
+
+Simple, devops cost is cheap. However: hard to modify and operating. Not isolating, hard to scale, all code are the same
+
+#### Microservices Architecture
+
+Now problems: how to manager, how to update, disaster, load balance, configure.
+
+How K8S solved it:
+
+- Pod: one service of microservices
+
+- ReplicaSet: diseater recovery for pod lost (replacing) and auto scaling
+
+- Deployment: update and rotate
+
+- Voting Service: single service name. ip changes wone affect. load balancing
+
+- YAML: config
+
+### Minikube
+
+Control planel in a single node.
+
+driver is the way that it creates node. 
+
+#### Basic K8S command:
+
+```
+kubectl cluster-info
+Kubernetes control plane is running at https://xx.xx.xx.xx:8443
+KubeDNS is running at https://xx.xx.xx.xx:8443/api/v1/namespaces/kube-system/services/kube-dns:dns/proxy
+```
+
+```
+kubectl get node
+NAME     STATUS    ROLES                     AGE   VERSION
+minikube  Ready    control-plane, master     69s   v1.20.2
+```
+
+### YAML (markup language)
+
+Idention should be space not tab.
+
+2 method:
+
+1. Dictionary: (keys) 
+
+```
+apiVersion: 1
+kind: Pod
+metadata:
+	name: nginx-busybox
+	labels:
+		app: test
+spec:
+	container:
+		- name: nginx
+		  image: nginx
+```
+2. Array:
+
+```
+namelist:
+	- Tom
+	- Jerry
+	- John
+```
+
+### POD
+
+Pod is the smallest deployable units of computing that you can create and manage in Kubernetes. 
+
+container in the same pod can write and read to the same file. And can access each other via localhost.
+
+K8s create container via pod. no container can survive without pod. Container in the same node must assign in the same node.
+
+Best practice: each pod has a single container.
+
+#### basic pod command:
+
+- kubectl get pod -o wide
+
+- kubectl run nginx --image nginx
+
+- kubectl describe pod/nginx
+
+- kubectl delete pod/nginx
+
+- kubectl apply -f vote-pod.yaml
+
+- kubectl port-forward pod.vote 8080:80
+
+- kubectl logs pod/worker
+
+
+### Controller - ReplicaSet/Replication controller
+
+Replica set:  (selector to control which pod is managed by this replica set)
+
+```
+apiVersion: 1
+kind: ReplicaSet
+metadata:
+	name: frontend
+	labels:
+		app: guestbook
+spec:
+	relicas: 4
+	selector:
+		matchLabels:
+			tier: frontend
+	template:
+		metadata:
+			labels:	
+				tier: frontend
+		spec:
+			containers:
+				- name: php-redis
+				  image: gcr.....
+```
+
+How to change using cli:
+
+kubectl scale --replicas=3 rs/foo
+
+#### other basic command for replicaset:
+
+- kubectl get replicaset
+
+or 
+
+- kubectl get rs
+
+- kubectl get all
+
+### Development
+
+Update the pods. Deployment is using replicaset to add new nodes.
+
+- kubectl create deployment
+
+Two kinds:
+- recreate
+
+- 
